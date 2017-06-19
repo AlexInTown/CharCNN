@@ -20,11 +20,6 @@ class CharConvNet(object):
                  no_of_classes = 4,
                  th = 1e-6):
 
-
-    
-        seed = time.time()
-        
-        tf.set_random_seed(seed)
         with tf.name_scope("Input-Layer"):
             #Model inputs
             self.input_x = tf.placeholder(tf.int64, shape = [None, l0], name='input_x')
@@ -34,11 +29,11 @@ class CharConvNet(object):
         with tf.name_scope("Embedding-Layer"), tf.device('/cpu:0'):
             #Quantization layer
             
-            Q = tf.concat([
+            Q = tf.concat(
+                          [
                               tf.zeros([1, alphabet_size]), # Zero padding vector for out of alphabet characters
                               tf.one_hot(range(alphabet_size), alphabet_size, 1.0, 0.0) # one-hot vector representation for alphabets
-                           ],
-                           0,
+                           ],0,
                           name='Q')
             
             x = tf.nn.embedding_lookup(Q, self.input_x)
@@ -62,10 +57,9 @@ class CharConvNet(object):
                 conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], "VALID", name='Conv') # Perform the convolution operation
                 x = tf.nn.bias_add(conv, b)
                 
-                #Threshold
-            with tf.name_scope("ThresholdLayer"):
-                # x = tf.select(tf.less(x, th), tf.zeros_like(x), x)
-                x = tf.where(tf.less(x, th), tf.zeros_like(x), x)
+            #     #Threshold
+            # with tf.name_scope("ThresholdLayer"):
+            #     x = tf.where(tf.less(x, th), tf.zeros_like(x), x)
 
                 
 
@@ -98,8 +92,8 @@ class CharConvNet(object):
                 
                 x = tf.nn.xw_plus_b(x, W, b)
                 
-            with tf.name_scope("ThresholdLayer" ):
-                x = tf.where(tf.less(x, th), tf.zeros_like(x), x)
+            # with tf.name_scope("ThresholdLayer" ):
+            #     x = tf.where(tf.less(x, th), tf.zeros_like(x), x)
                 
 
             with tf.name_scope("DropoutLayer"):
@@ -120,7 +114,7 @@ class CharConvNet(object):
 
 
         with tf.name_scope('loss'):
-            losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.p_y_given_x, labels=self.input_y)
+            losses = tf.nn.softmax_cross_entropy_with_logits(labels = self.input_y, logits = self.p_y_given_x)
             self.loss = tf.reduce_mean(losses)
 
         with tf.name_scope("Accuracy"):

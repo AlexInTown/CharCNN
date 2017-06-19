@@ -82,16 +82,11 @@ class Data(object):
         s = s.lower()
         m = len(s)
         n = min(m, self.length)
-        str2idx = np.zeros(self.length, dtype='int64') 
-        k = 0
-        for i in range(1, n+1):
-            c = s[-i]
+        str2idx = np.zeros(self.length, dtype='int64')
+        for i in range(1, n):
+            c = s[i]
             if c in self.dict:
-                str2idx[i-1] = self.dict[c]
-            
-                
-                
-            
+                str2idx[i] = self.dict[c]
         return str2idx
 
 

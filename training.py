@@ -4,13 +4,16 @@ import numpy as np
 import tensorflow as tf
 import sys
 import os
+import config
 from data_utils import Data
 from char_cnn import CharConvNet
 
-
+learning_rate = 0.001
 if __name__ == '__main__':
+    print 'start...'
     execfile("config.py")
-
+    print config.model.th
+    print 'end...'
     print "Loading data ....",
     train_data = Data(data_source = config.train_data_source,
                       alphabet = config.alphabet,
@@ -49,16 +52,16 @@ if __name__ == '__main__':
 
             global_step = tf.Variable(0, trainable=False)
             
-            boundaries = []
-            br = config.training.base_rate
-            values = [br]
-            for i in range(1, 10):
-                values.append(br / (2 ** i))
-                boundaries.append(15000 * i)
-            values.append(br / (2 ** (i + 1)))
-            print(values)
-            print(boundaries)
-            learning_rate = tf.train.piecewise_constant(global_step, boundaries, values)
+            # boundaries = []
+            # br = config.training.base_rate
+            # values = [br]
+            # for i in range(1, 10):
+            #     values.append(br / (2 ** i))
+            #     boundaries.append(15000 * i)
+            # values.append(br / (2 ** (i + 1)))
+            # print(values)
+            # print(boundaries)
+            # learning_rate = tf.train.piecewise_constant(global_step, boundaries, values)
 
             #learning_rate = tf.train.exponential_decay(config.training.base_rate,
             #                                           global_step,
@@ -108,7 +111,7 @@ if __name__ == '__main__':
                 os.makedirs(checkpoint_dir)
             saver = tf.train.Saver(tf.all_variables())
 
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
             
                                      
             def train_step(x_batch, y_batch):
@@ -152,11 +155,8 @@ if __name__ == '__main__':
                 if writer:
                     writer.add_summary(summaries, step)
 
-            # Passing global_step to minimize() will increment it at each step.
-
-            # Training loop. For each batch...\
-
             for e in range(config.training.epoches):
+                print e
                 train_data.shuffleData()
                 for k in range(num_batches_per_epoch):
 
